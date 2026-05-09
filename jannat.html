@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - INRPAY</title>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f0f2f5; color: #333; margin: 0; }
+        .container { background: white; padding: 25px; border-radius: 15px; max-width: 600px; margin: 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2, h3 { color: #2b0a4a; text-align: center; border-bottom: 2px solid #6a11cb; padding-bottom: 10px; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: #6a11cb; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 5px; }
+        button:hover { background: #2b0a4a; }
+        
+        #adminApp { display: none; }
+        
+        /* List Styling */
+        .list-item { border-left: 5px solid #6a11cb; background: #f9f9f9; margin-bottom: 15px; padding: 15px; border-radius: 5px; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .list-item span { font-size: 13px; }
+        .status-badge { font-weight: bold; padding: 2px 8px; border-radius: 4px; font-size: 12px; display: inline-block; width: fit-content; }
+        .pending { background: #fff3cd; color: #856404; }
+        .approved { background: #d4edda; color: #155724; }
+        
+        .action-btn { background: #28a745; width: auto; align-self: flex-end; padding: 8px 15px; font-size: 12px; margin-top: 5px; }
+        .section-title { margin-top: 30px; text-align: left; font-size: 18px; color: #444; border-bottom: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+
+<div id="adminAuth" class="container">
+    <h2>Admin Login</h2>
+    <input id="adminUser" type="text" placeholder="Username">
+    <input id="adminPass" type="password" placeholder="Password">
+    <button onclick="adminLogin()">Access Panel</button>
+</div>
+
+<div id="adminApp">
+    <div class="container">
+        <h2>Admin Panel</h2>
+        
+        <label><b>Scrolling Notice:</b></label>
+        <textarea id="noticeInput" rows="2" placeholder="Enter scrolling text..."></textarea>
+
+        <label><b>Payment Settings:</b></label>
+        <button id="upload_widget_btn" style="background: #007bff; margin-top: 10px;">Upload New QR (Cloudinary)</button>
+        <input id="qr" placeholder="QR URL" readonly>
+        <input id="upi" placeholder="UPI ID (e.g. name@apl)">
+        <input id="amount" placeholder="Security Deposit Amount (₹)">
+        
+        <button onclick="save()" style="background: #2b0a4a; margin-top: 20px; font-size: 16px;">Save System Settings</button>
+    </div>
+
+    <div class="container">
+        <h3 class="section-title">🛡️ Security Deposit History (UTR)</h3>
+        <div id="depositList">Loading deposits...</div>
+    </div>
+
+    <div class="container">
+        <h3 class="section-title">💰 Withdrawal Requests</h3>
+        <div id="withdrawalList">Loading withdrawals...</div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, getDocs, collection, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBh-J9LAYeCfxNoKw9C94gbCqVhELofuoo",
+    authDomain: "inrpay-44413.firebaseapp.com",
+    projectId: "inrpay-44413"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// --- Cloudinary Setup ---
+const myWidget = cloudinary.createUploadWidget({
+    cloudName: "dxxwlovdf", 
+    uploadPreset: "inrpay_upload"
+}, (error, result) => { 
+    if (!error && result && result.event === "success") { 
+        document.getElementById("qr").value = result.info.secure_url;
+        alert("QR Image Uploaded!");
+    }
+});
+document.getElementById("upload_widget_btn").addEventListener("click", () => myWidget.open());
+
+// --- Admin Authentication ---
+window.adminLogin = async () => {
+    const u = document.getElementById("adminUser").value;
+    const p = document.getElementById("adminPass").value;
+    const snap = await getDoc(doc(db, "admins", "admin1"));
+
+    if (snap.exists() && snap.data().username === u && snap.data().password === p) {
+        document.getElementById("adminAuth").style.display = "none";
+        document.getElementById("adminApp").style.display = "block";
+        loadPanelData();
+    } else {
+        alert("Invalid Admin Credentials!");
+    }
+};
+
+// --- Save Settings ---
+window.save = async () => {
+    try {
+        await setDoc(doc(db, "settings", "main"), {
+            notice: document.getElementById("noticeInput").value,
+            qr: document.getElementById("qr").value,
+            upi: document.getElementById("upi").value,
+            amount: document.getElementById("amount").value
+        });
+        alert("Settings successfully updated!");
+    } catch (e) { alert("Error saving: " + e); }
+};
+
+// --- Load Data ---
+async function loadPanelData() {
+    // 1. Load Main Settings
+    let s = await getDoc(doc(db, "settings", "main"));
+    if(s.exists()){
+        document.getElementById("noticeInput").value = s.data().notice || "";
+        document.getElementById("qr").value = s.data().qr || "";
+        document.getElementById("upi").value = s.data().upi || "";
+        document.getElementById("amount").value = s.data().amount || "";
+    }
+
+    // 2. Load Deposits (Security UTR History)
+    const depSnap = await getDocs(collection(db, "deposits"));
+    const depList = document.getElementById("depositList");
+    depList.innerHTML = "";
+    
+    if(depSnap.empty) depList.innerHTML = "<p>No deposit requests found.</p>";
+    
+    depSnap.forEach(d => {
+        const item = d.data();
+        depList.innerHTML += `
+            <div class="list-item">
+                <span><b>User:</b> ${item.user}</span>
+                <span><b>UTR No:</b> ${item.utr}</span>
+                <span><b>Date:</b> ${item.date}</span>
+                <div><b>Status:</b> <span class="status-badge ${item.status.toLowerCase()}">${item.status}</span></div>
+                ${item.status === "Pending" ? `<button class="action-btn" onclick="approveDeposit('${d.id}')">Approve UTR</button>` : ""}
+            </div>`;
+    });
+
+    // 3. Load Withdrawals
+    const withSnap = await getDocs(collection(db, "withdrawals"));
+    const withList = document.getElementById("withdrawalList");
+    withList.innerHTML = "";
+
+    if(withSnap.empty) withList.innerHTML = "<p>No withdrawal requests.</p>";
+
+    withSnap.forEach(d => {
+        const item = d.data();
+        if(item.status === "Pending") {
+            withList.innerHTML += `
+                <div class="list-item" style="border-left-color: #e91e63;">
+                    <span><b>User:</b> ${item.user}</span>
+                    <span><b>Amount:</b> ₹${item.amount}</span>
+                    <span><b>Date:</b> ${item.date}</span>
+                    <button class="action-btn" style="background:#e91e63" onclick="approveWithdrawal('${d.id}')">Mark Paid</button>
+                </div>`;
+        }
+    });
+}
+
+// --- Action Functions ---
+window.approveDeposit = async (id) => {
+    if(confirm("Confirm this deposit approval?")) {
+        await updateDoc(doc(db, "deposits", id), { status: "Approved" });
+        alert("Deposit Verified!");
+        loadPanelData();
+    }
+};
+
+window.approveWithdrawal = async (id) => {
+    if(confirm("Mark this withdrawal as completed?")) {
+        await updateDoc(doc(db, "withdrawals", id), { status: "Done" });
+        alert("Payout Marked as Done!");
+        loadPanelData();
+    }
+};
+
+</script>
+</body>
+</html>
