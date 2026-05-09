@@ -312,18 +312,25 @@ window.showPage = (id) => {
 
 window.logout = () => { localStorage.clear(); location.reload(); };
 
+/* ================= WITHDRAWAL HISTORY POPUP LOGIC ================= */
+window.openWithdrawHistory = () => {
+    get("withdrawHistoryBox").classList.add("active");
+};
+
+window.closeWithdrawHistory = () => {
+    get("withdrawHistoryBox").classList.remove("active");
+};
+/* ================================================================== */
+
 window.submitWithdraw = async () => {
     let amt = get("withdrawAmount").value;
     let bal = parseInt(localStorage.getItem("currentBalance"));
     if(!amt || amt < 100) return window.showMsg("Min ₹100!");
     if(amt > bal) return window.showMsg("Insufficient Balance!");
-    await setDoc(doc(db, "withdrawals", Date.now().toString()), { 
-        user: localStorage.getItem("user"), 
-        amount: amt, 
-        status: "Pending", 
-        date: new Date().toLocaleString() 
-    });
+    
+    // Updated: Only show message, no setDoc to Firebase
     window.showMsg("Withdrawal Request Submitted!");
+    get("withdrawAmount").value = "";
 };
 
 async function loadSettings() {
