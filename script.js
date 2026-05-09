@@ -1,12 +1,20 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updatePassword, EmailAuthProvider, reauthenticateWithCredential, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+// App Check import add kiya gaya
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app-check.js";
 
 // Firebase Configuration
 const app = initializeApp({
     apiKey: "AIzaSyBh-J9LAYeCfxNoKw9C94gbCqVhELofuoo",
     authDomain: "inrpay-44413.firebaseapp.com",
     projectId: "inrpay-44413"
+});
+
+// App Check Initialize karein (reCAPTCHA Site Key yahan dalein)
+const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_SITE_KEY_HERE'),
+    isTokenAutoRefreshEnabled: true
 });
 
 const db = getFirestore(app);
@@ -400,3 +408,12 @@ window.downloadQR = async () => {
         window.showMsg("Opening QR in new tab...");
     }
 };
+
+/* ================= SERVICE WORKER REGISTRATION (PWA) ================= */
+if ('service-worker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('Service Worker Registered'))
+            .catch(err => console.log('Service Worker Failed', err));
+    });
+}
