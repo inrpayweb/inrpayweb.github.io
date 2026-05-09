@@ -374,7 +374,7 @@ window.copyUPI = () => {
     const upiId = get("upiText").innerText;
     if (upiId && upiId !== "Loading..." && upiId !== "N/A") {
         navigator.clipboard.writeText(upiId).then(() => {
-            window.showMsg("UPI ID Copied to Clipboard!");
+            window.showMsg("Copy!");
         }).catch(() => {
             const textArea = document.createElement("textarea");
             textArea.value = upiId;
