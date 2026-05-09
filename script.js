@@ -382,7 +382,7 @@ window.copyUPI = () => {
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            window.showMsg("UPI ID Copied!");
+            window.showMsg("Copy");
         });
     }
 };
