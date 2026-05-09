@@ -146,6 +146,7 @@
                 <input id="withdrawAmount" type="number" placeholder="Min ₹100" style="margin:0 !important; flex: 2;">
                 <button onclick="submitWithdraw()" style="background:#4caf50; color:white; flex: 1; margin:0 !important; padding:12px; font-weight:bold; border-radius: 10px;">Withdraw</button>
             </div>
+            <button onclick="openWithdrawHistory()" style="background:#555; color:white; width:90%; margin:10px auto; display:block; padding:8px; border-radius:8px; border:none; font-size:12px;">Withdrawal History</button>
         </div>
         <div class="refer-box">
             <h3 style="margin: 0;">🎁 Refer & Earn</h3>
@@ -240,6 +241,14 @@
         <input id="forgotEmail" placeholder="Email Address">
         <button onclick="forgotPassword()" style="background:#6a11cb; color:white; width:100%;">Send Reset Link</button>
         <button onclick="closeForgot()" style="width:100%; margin-top:5px;">Cancel</button>
+    </div>
+</div>
+
+<div id="withdrawHistoryBox" class="popup">
+    <div class="popup-box">
+        <h3 style="text-align:center; color:#6a11cb;">Withdrawal History</h3>
+        <div class="no-data-box" style="color: #666;">No history available</div>
+        <button onclick="closeWithdrawHistory()" style="width:100%; margin-top:20px; background:#6a11cb; color:white; border:none; padding:10px; border-radius:8px;">Close</button>
     </div>
 </div>
 
