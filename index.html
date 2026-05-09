@@ -3,6 +3,13 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>INRPAY</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6a11cb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5968/5968279.png">
+
     <link rel="stylesheet" href="style.css">
     <style>
         input, .passwordBox {
@@ -78,6 +85,7 @@
         </div>
     </div>
 </div>
+
 <div id="auth">
     <h1 class="appLogo">INRPAY</h1>
     <h2 id="authTitle">Create Account</h2>
@@ -241,5 +249,16 @@
 </div>
 
 <script type="module" src="script.js"></script>
+
+<script>
+  if ('service-worker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Service Worker Registered'))
+        .catch(err => console.log('Service Worker Failed', err));
+    });
+  }
+</script>
+
 </body>
 </html>
