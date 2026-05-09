@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>INRPAY</title>
     
@@ -8,7 +9,8 @@
     <meta name="theme-color" content="#6a11cb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5968/5968279.png">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
 
     <link rel="stylesheet" href="style.css">
     <style>
@@ -253,7 +255,7 @@
 <script>
   if ('service-worker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
+      navigator.serviceWorker.register('./service-worker.js')
         .then(reg => console.log('Service Worker Registered'))
         .catch(err => console.log('Service Worker Failed', err));
     });
